@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Form Test</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;color:#fff;font-family:Helvetica,Arial,sans-serif}
+#t{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-weight:700;letter-spacing:0.08em;font-size:22vmin;white-space:nowrap}
+#t span{position:absolute;left:0;top:0;mix-blend-mode:screen;opacity:0}
+#info{position:absolute;left:50%;top:72%;transform:translateX(-50%);text-align:center;font-size:3.2vmin;line-height:1.5;color:#bbb;white-space:nowrap}
+#bar{position:absolute;top:0;width:0.6vmin;height:100%;background:#fff;opacity:0.5}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="t">TEST<span id="r">TEST</span><span id="c">TEST</span></div>
+<div id="info"></div>
+<script>
+var surface = new URLSearchParams(location.search).get('surface');
+var info = document.getElementById('info'), t = document.getElementById('t');
+var r = document.getElementById('r'), c = document.getElementById('c'), bar = document.getElementById('bar');
+r.style.color = '#f03'; c.style.color = '#0ef';
+
+function showInfo() {
+  var dpr = window.devicePixelRatio || 1;
+  info.innerHTML = 'surface: ' + (surface || '(none)') + '<br>' +
+    'window: ' + innerWidth + ' × ' + innerHeight + ' px' +
+    (dpr !== 1 ? ' (× ' + dpr + ' = ' + Math.round(innerWidth * dpr) + ' × ' + Math.round(innerHeight * dpr) + ')' : '') +
+    '<br>' + new Date().toLocaleTimeString();
+}
+
+var glitchUntil = 0;
+function frame(now) {
+  // a slow bar sweeping left to right shows the page is running
+  bar.style.left = ((now / 6000) % 1 * 100) + '%';
+  // short random glitches: colour split and a sideways jump
+  if (now > glitchUntil && Math.random() < 0.02) glitchUntil = now + 80 + Math.random() * 200;
+  if (now < glitchUntil) {
+    var dx = (Math.random() - 0.5) * 3;
+    t.style.transform = 'translate(calc(-50% + ' + dx + 'vmin), -50%)';
+    r.style.opacity = c.style.opacity = 1;
+    r.style.transform = 'translate(' + (Math.random() * 2) + 'vmin,0)';
+    c.style.transform = 'translate(' + (-Math.random() * 2) + 'vmin,0)';
+  } else {
+    t.style.transform = 'translate(-50%,-50%)';
+    r.style.opacity = c.style.opacity = 0;
+  }
+  requestAnimationFrame(frame);
+}
+showInfo();
+setInterval(showInfo, 1000);
+addEventListener('resize', showInfo);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
